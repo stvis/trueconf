@@ -29,16 +29,16 @@
 					fwrite($fp, $xml_text);
 					}
 				}
-			
+
 			}
 	}
-	
+
 	function getLanguage($sitemap)
 	{
 	$lang = explode(".",$sitemap);
 	return ($lang[0]);
 	}
-	
+
 $domain = "http://site.ru";
 $priority = "0.8";
 
