@@ -1,30 +1,38 @@
 <?
-	function getNameSitemap($array_json,$portion,$portion0=null)
+	function getSitemap($array_json,$part,$lastPart=null)
 	{
-	GLOBAL $domain, $fp,$lang;
-	if ($portion0){
-		$portion0 .= "/".$portion;
+	GLOBAL $domain, $fp,$lang,$priority;
+	if ($lastPart){
+		$lastPart .= "/".$part;
 	}
 	else
 	{
-	$portion0 .= $portion;
+	$lastPart .= $part;
 	}
-	foreach($array_json as $portion2 => $value2)
+	foreach($array_json as $nextPart => $value)
 			{
-				if (is_array($value2)){
-					getNameSitemap ($value2,$portion2,$portion);
+				if (is_array($value)){
+					getSitemap ($value,$nextPart,$part);
 				}
 				else
 				{
-					$link = $domain."/".$lang."/".$portion0."/".$value2.".html";
-					$xml_text ='<url> <loc>'.$link.'</loc> <priority>0.8</priority> </url>';
+					$link = $domain."/".$lang."/".$lastPart."/".$value.".html";
+					$xml_text ='<url> <loc>'.$link.'</loc> <priority>'.$priority.'</priority> </url>';
 					fwrite($fp, $xml_text);
 				}
 			
 			}
 	}
 	
+	function getLanguage($sitemap)
+	{
+	$lang = explode(".",$sitemap);
+	return ($lang[0]);
+	}
+	
 $domain = "http://site.ru";
+$priority = "0.8";
+
 $fp = fopen('sitemap.xml', 'w');
 $xml_text = '<?xml version="1.0" encoding="UTF-8"?>
 <urlset xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -34,24 +42,12 @@ print "Доступные языковые локализации<br>";
 foreach (glob("*.sitemap.json") as $sitemap)
     {
     echo $sitemap."<br>";
-	$lang = explode(".",$sitemap);
-	$lang = $lang[0];
+	$lang = getLanguage($sitemap);
 	$json_sitemap = json_decode(file_get_contents($sitemap));
 
-	foreach($json_sitemap as $portion => $value)
+	foreach($json_sitemap as $part => $value)
 		{
-			getNameSitemap($value,$portion);
-		/*foreach($value as $portion2 => $value2)
-			{
-				if (is_array($value2)){
-				getNameSitemap ($value2,$portion2,$portion);
-				}
-				else
-				{$link = $domain."/".$portion."/".$value2.".html";
-				print $link."<br>";}
-			
-			}
-		*/
+			getSitemap($value,$part);
 		}
     }
 $xml_text = "</urlset>";
