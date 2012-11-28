@@ -12,13 +12,22 @@
 	foreach($array_json as $nextPart => $value)
 			{
 				if (is_array($value)){
-					getSitemap ($value,$nextPart,$part);
+					getSitemap ($value,$nextPart,$lastPart);
 				}
 				else
 				{
+					if (is_object($value)){			
+					foreach($value as $object_part => $nextValue)
+						{
+							$object_nextPart = $lastPart."/".$nextPart;
+							getSitemap($nextValue,$object_part,$object_nextPart);
+						}
+					}
+					else{
 					$link = $domain."/".$lang."/".$lastPart."/".$value.".html";
 					$xml_text ='<url> <loc>'.$link.'</loc> <priority>'.$priority.'</priority> </url>';
 					fwrite($fp, $xml_text);
+					}
 				}
 			
 			}
@@ -44,7 +53,6 @@ foreach (glob("*.sitemap.json") as $sitemap)
     echo $sitemap."<br>";
 	$lang = getLanguage($sitemap);
 	$json_sitemap = json_decode(file_get_contents($sitemap));
-
 	foreach($json_sitemap as $part => $value)
 		{
 			getSitemap($value,$part);
